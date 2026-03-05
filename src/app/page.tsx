@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { RightRail } from "@/components/layout/right-rail";
 import { TopicMonitorPanel } from "@/components/layout/topic-monitor-panel";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
@@ -18,6 +18,7 @@ function HomePage() {
   const { filters, setFilters, clearFilters, hasActiveFilters } = usePaperFilters();
   const { papers, total, hasMore, isLoading, isLoadingMore, loadMore } = usePapers(filters);
   const { open: drawerOpen, close: closeDrawer } = useMobileDrawer();
+  const [journalCloudOpen, setJournalCloudOpen] = useState(false);
 
   const paperCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -116,7 +117,22 @@ function HomePage() {
             </div>
 
             <div className="border-t border-gray-200 px-4 py-2 dark:border-gray-800">
-              <div className="mb-1 flex justify-end">
+              <div className="mb-1 flex items-center justify-between">
+                <button
+                  onClick={() => setJournalCloudOpen((v) => !v)}
+                  className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <svg
+                    className={`h-3.5 w-3.5 transition-transform ${journalCloudOpen ? "rotate-90" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Journals{filters.journals?.length ? ` (${filters.journals.length})` : ""}
+                </button>
                 <button
                   onClick={() => setFilters({ journals: undefined })}
                   className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
@@ -128,12 +144,14 @@ function HomePage() {
                   All journals
                 </button>
               </div>
-              <JournalCloud
-                journals={JOURNALS}
-                activeJournals={filters.journals || []}
-                onToggle={toggleJournal}
-                paperCounts={paperCounts}
-              />
+              {journalCloudOpen && (
+                <JournalCloud
+                  journals={JOURNALS}
+                  activeJournals={filters.journals || []}
+                  onToggle={toggleJournal}
+                  paperCounts={paperCounts}
+                />
+              )}
             </div>
           </div>
 
