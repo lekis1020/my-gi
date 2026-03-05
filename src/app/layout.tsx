@@ -1,0 +1,42 @@
+import type { Metadata } from "next";
+import { Manrope, Space_Grotesk } from "next/font/google";
+import "./globals.css";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { MobileDrawerProvider } from "@/components/layout/mobile-drawer-context";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+});
+
+export const metadata: Metadata = {
+  title: "My GI - Gastroenterology Journal Portal",
+  description:
+    "Browse the latest papers from top gastroenterology journals in a social media-style timeline feed.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
+        <MobileDrawerProvider>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </MobileDrawerProvider>
+      </body>
+    </html>
+  );
+}
