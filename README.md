@@ -57,10 +57,22 @@ src/
 └── types/                  # TypeScript type definitions
 ```
 
-## Journals Covered
+## Journals Covered (37 journals)
 
-**Gastroenterology (8 journals):**
-Gastroenterology, Gastrointestinal Endoscopy, Clinical Endoscopy, Gut and Liver, World Journal of Gastroenterology, Journal of Gastrointestinal Surgery, Journal of Gastrointestinal Oncology, IJGI
+**General Medical (GI-filtered):**
+NEJM, The Lancet, BMJ, JAMA, Annals of Internal Medicine, JAMA Network Open
+
+**Top GI / Hepatology:**
+Nature Reviews Gastroenterology & Hepatology, The Lancet Gastroenterology & Hepatology, Gastroenterology, Journal of Hepatology, Gut, Hepatology, Clinical Gastroenterology and Hepatology
+
+**Core GI / Endoscopy:**
+American Journal of Gastroenterology, Endoscopy, Clinical and Molecular Hepatology, Journal of Crohn's and Colitis, Gastrointestinal Endoscopy, Alimentary Pharmacology & Therapeutics, United European Gastroenterology Journal, World Journal of Gastroenterology, Digestive Endoscopy, IJGI
+
+**Specialty:**
+Intestinal Research, Inflammatory Bowel Diseases, Neurogastroenterology and Motility, Journal of Gastrointestinal Surgery, Journal of Clinical Gastroenterology, Digestive Diseases and Sciences, Endoscopy International Open, Journal of Gastrointestinal Oncology, VideoGIE
+
+**Korean GI:**
+Clinical Endoscopy, Gut and Liver, Journal of Neurogastroenterology and Motility, Korean Journal of Internal Medicine, Korean Journal of Gastroenterology
 
 ## Database Schema
 
