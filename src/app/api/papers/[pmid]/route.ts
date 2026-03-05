@@ -2,11 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAnonClient } from "@/lib/supabase/server";
 import { classifyPaperTopics } from "@/lib/utils/topic-tags";
 import { decodeHtmlEntities } from "@/lib/utils/html-entities";
+import { rateLimit } from "@/lib/utils/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, maxRequests: 60 });
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ pmid: string }> }
 ) {
+  const ip =
+    _request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    _request.headers.get("x-real-ip") ||
+    "unknown";
+
+  const { success, resetAt } = limiter.check(ip);
+
+  if (!success) {
+    const retryAfter = Math.ceil((resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   const { pmid } = await params;
 
   if (!pmid || !/^\d+$/.test(pmid)) {

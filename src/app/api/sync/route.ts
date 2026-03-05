@@ -20,9 +20,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const fullSync = (body as Record<string, unknown>).fullSync === true;
-    const days = typeof (body as Record<string, unknown>).days === "number"
+    const rawDays = typeof (body as Record<string, unknown>).days === "number"
       ? (body as Record<string, number>).days
       : 180;
+    const days =
+      Number.isFinite(rawDays) && rawDays >= 1
+        ? Math.min(Math.floor(rawDays), 365)
+        : 180;
 
     const supabase = createServiceClient();
     const results = await syncAllJournals(supabase, { days, fullSync });
