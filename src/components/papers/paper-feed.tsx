@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback } from "react";
 import { PaperCard } from "./paper-card";
 import { PaperCardSkeleton } from "@/components/ui/skeleton";
+import { AdUnit } from "@/components/ads/ad-unit";
 import type { PaperWithJournal } from "@/types/filters";
 import { Loader2 } from "lucide-react";
 
@@ -77,8 +78,16 @@ export function PaperFeed({
         {total.toLocaleString()} papers in your timeline
       </div>
       <div className="divide-y divide-gray-200 dark:divide-gray-800">
-        {papers.map((paper) => (
-          <PaperCard key={paper.id} paper={paper} />
+        {papers.map((paper, index) => (
+          <div key={paper.id}>
+            <PaperCard paper={paper} />
+            {(index + 1) % 5 === 0 && (
+              <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/50">
+                <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-400">Ad</p>
+                <AdUnit slot="5895188725" format="fluid" />
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
