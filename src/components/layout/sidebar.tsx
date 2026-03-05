@@ -45,7 +45,7 @@ export function Sidebar({
 
       <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Journals</h3>
-        <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
+        <div className="space-y-1.5 max-h-[560px] overflow-y-auto pr-1">
           {JOURNALS.map((journal) => {
             const isActive = filters.journals?.includes(journal.slug);
             return (
