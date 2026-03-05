@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/server";
 import {
   getCoordinatesForLocation,
   inferLocationFromAffiliation,
 } from "@/lib/utils/author-location";
+import { rateLimit } from "@/lib/utils/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, maxRequests: 30 });
 
 interface PaperRow {
   id: string;
@@ -19,6 +22,21 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function GET(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+
+  const { success, resetAt } = limiter.check(ip);
+
+  if (!success) {
+    const retryAfter = Math.ceil((resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const requestedDays = Number(searchParams.get("days") || process.env.CRON_SYNC_DAYS || "180");
   const days =
@@ -31,7 +49,7 @@ export async function GET(request: NextRequest) {
     .toISOString()
     .slice(0, 10);
 
-  const supabase = createServiceClient();
+  const supabase = createAnonClient();
 
   const { data: paperRows, error: paperError } = await supabase
     .from("papers")

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/server";
 import { inferLocationFromAffiliation } from "@/lib/utils/author-location";
+import { rateLimit } from "@/lib/utils/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, maxRequests: 30 });
 
 interface AuthorRow {
   paper_id: string;
@@ -27,6 +30,21 @@ function formatName(lastName: string, firstName: string | null, initials: string
 }
 
 export async function GET(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+
+  const { success, resetAt } = limiter.check(ip);
+
+  if (!success) {
+    const retryAfter = Math.ceil((resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const requestedDays = Number(searchParams.get("days") || "180");
   const days =
@@ -39,7 +57,7 @@ export async function GET(request: NextRequest) {
     .toISOString()
     .slice(0, 10);
 
-  const supabase = createServiceClient();
+  const supabase = createAnonClient();
 
   // Get all paper IDs in date range
   const { data: paperRows, error: paperError } = await supabase
