@@ -28,6 +28,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="google-adsense-account" content="ca-pub-8245767086450488" />
+      </head>
       <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
         <MobileDrawerProvider>
           <div className="flex min-h-screen flex-col">
