@@ -10,6 +10,9 @@ import { FilterBar } from "@/components/papers/filter-bar";
 import { SearchInput } from "@/components/papers/search-input";
 import { usePaperFilters } from "@/hooks/use-paper-filters";
 import { usePapers } from "@/hooks/use-papers";
+import { useBookmarks } from "@/hooks/use-bookmarks";
+import { useReadPapers } from "@/hooks/use-read-papers";
+import { useAuth } from "@/contexts/auth-context";
 import { PaperCardSkeleton } from "@/components/ui/skeleton";
 import { JOURNALS } from "@/lib/constants/journals";
 import { JournalCloud } from "@/components/papers/journal-cloud";
@@ -18,6 +21,9 @@ function HomePage() {
   const { filters, setFilters, clearFilters, hasActiveFilters } = usePaperFilters();
   const { papers, total, hasMore, isLoading, isLoadingMore, loadMore } = usePapers(filters);
   const { open: drawerOpen, close: closeDrawer } = useMobileDrawer();
+  const { user } = useAuth();
+  const { bookmarkedIds, toggleBookmark } = useBookmarks();
+  const { readIds, markAsRead } = useReadPapers();
 
   const paperCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -155,6 +161,11 @@ function HomePage() {
               isLoading={isLoading}
               isLoadingMore={isLoadingMore ?? false}
               onLoadMore={loadMore}
+              bookmarkedIds={bookmarkedIds}
+              readIds={readIds}
+              onToggleBookmark={toggleBookmark}
+              onMarkAsRead={markAsRead}
+              isLoggedIn={!!user}
             />
           </div>
         </div>
