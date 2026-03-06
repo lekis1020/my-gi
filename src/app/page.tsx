@@ -13,6 +13,7 @@ import { useReadPapers } from "@/hooks/use-read-papers";
 import { useAuth } from "@/contexts/auth-context";
 import { PaperCardSkeleton } from "@/components/ui/skeleton";
 import { JOURNALS } from "@/lib/constants/journals";
+import { JournalCloud } from "@/components/papers/journal-cloud";
 
 function HomePage() {
   const { filters, setFilters, clearFilters, hasActiveFilters } = usePaperFilters();
@@ -21,6 +22,14 @@ function HomePage() {
   const { user } = useAuth();
   const { bookmarkedIds, toggleBookmark } = useBookmarks();
   const { readIds, markAsRead } = useReadPapers();
+
+  const paperCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of papers) {
+      counts[p.journal_slug] = (counts[p.journal_slug] || 0) + 1;
+    }
+    return counts;
+  }, [papers]);
 
   const handleRemoveFilter = (key: string, value?: string) => {
     if (key === "journals" && value) {
@@ -101,34 +110,24 @@ function HomePage() {
             </div>
 
             <div className="border-t border-gray-200 px-4 py-2 dark:border-gray-800">
-              <div className="flex gap-2 overflow-x-auto">
+              <div className="mb-1 flex justify-end">
                 <button
                   onClick={() => setFilters({ journals: undefined })}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     !filters.journals?.length
                       ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                      : "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                      : "border-gray-300 text-gray-600 hover:border-gray-400 dark:border-gray-700 dark:text-gray-300"
                   }`}
                 >
                   All journals
                 </button>
-                {JOURNALS.map((journal) => {
-                  const active = filters.journals?.includes(journal.slug);
-                  return (
-                    <button
-                      key={journal.slug}
-                      onClick={() => toggleJournal(journal.slug)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                        active
-                          ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                          : "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-300"
-                      }`}
-                    >
-                      {journal.abbreviation}
-                    </button>
-                  );
-                })}
               </div>
+              <JournalCloud
+                journals={JOURNALS}
+                activeJournals={filters.journals || []}
+                onToggle={toggleJournal}
+                paperCounts={paperCounts}
+              />
             </div>
           </div>
 
