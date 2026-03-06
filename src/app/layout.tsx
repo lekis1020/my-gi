@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { MobileDrawerProvider } from "@/components/layout/mobile-drawer-context";
+import { BottomNav } from "@/components/layout/bottom-nav";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -15,6 +15,10 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
 });
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "My GI - Gastroenterology Journal Portal",
@@ -33,13 +37,14 @@ export default function RootLayout({
         <meta name="google-adsense-account" content="ca-pub-8245767086450488" />
       </head>
       <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
-        <MobileDrawerProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+            <div className="hidden lg:block">
+              <Footer />
+            </div>
+            <BottomNav />
           </div>
-        </MobileDrawerProvider>
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8245767086450488"

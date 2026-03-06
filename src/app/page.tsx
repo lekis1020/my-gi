@@ -1,32 +1,18 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense } from "react";
 import { RightRail } from "@/components/layout/right-rail";
 import { TopicMonitorPanel } from "@/components/layout/topic-monitor-panel";
-import { MobileDrawer } from "@/components/layout/mobile-drawer";
-import { useMobileDrawer } from "@/components/layout/mobile-drawer-context";
 import { PaperFeed } from "@/components/papers/paper-feed";
 import { FilterBar } from "@/components/papers/filter-bar";
 import { SearchInput } from "@/components/papers/search-input";
 import { usePaperFilters } from "@/hooks/use-paper-filters";
 import { usePapers } from "@/hooks/use-papers";
 import { PaperCardSkeleton } from "@/components/ui/skeleton";
-import { JOURNALS } from "@/lib/constants/journals";
-import { JournalCloud } from "@/components/papers/journal-cloud";
 
 function HomePage() {
   const { filters, setFilters, clearFilters, hasActiveFilters } = usePaperFilters();
   const { papers, total, hasMore, isLoading, isLoadingMore, loadMore } = usePapers(filters);
-  const { open: drawerOpen, close: closeDrawer } = useMobileDrawer();
-  const [journalCloudOpen, setJournalCloudOpen] = useState(false);
-
-  const paperCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const p of papers) {
-      counts[p.journal_slug] = (counts[p.journal_slug] || 0) + 1;
-    }
-    return counts;
-  }, [papers]);
 
   const handleRemoveFilter = (key: string, value?: string) => {
     if (key === "journals" && value) {
@@ -43,31 +29,8 @@ function HomePage() {
     setFilters({ sort });
   };
 
-  const toggleJournal = (slug: string) => {
-    const current = filters.journals || [];
-    const updated = current.includes(slug)
-      ? current.filter((s) => s !== slug)
-      : [...current, slug];
-
-    setFilters({ journals: updated.length > 0 ? updated : undefined });
-  };
-
-  const handleDrawerActivate = (topic: string) => {
-    setFilters({ q: topic, sort: "date_desc" });
-    closeDrawer();
-  };
-
   return (
     <div className="mx-auto w-full max-w-[1280px] px-0 sm:px-4 sm:py-4">
-      <MobileDrawer
-        open={drawerOpen}
-        onClose={closeDrawer}
-        activeQuery={filters.q}
-        onActivate={handleDrawerActivate}
-        onClearActive={() => setFilters({ q: undefined })}
-        total={total}
-        papers={papers}
-      />
       <div className="grid min-h-[calc(100vh-56px)] grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_320px]">
         <div className="hidden lg:block lg:pr-4">
           <div className="sticky top-20 max-h-[calc(100vh-96px)] overflow-y-auto pr-1">
@@ -114,44 +77,6 @@ function HomePage() {
                 onChange={(q) => setFilters({ q: q || undefined })}
                 placeholder="Search topic, PMID, DOI"
               />
-            </div>
-
-            <div className="border-t border-gray-200 px-4 py-2 dark:border-gray-800">
-              <div className="mb-1 flex items-center justify-between">
-                <button
-                  onClick={() => setJournalCloudOpen((v) => !v)}
-                  className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  <svg
-                    className={`h-3.5 w-3.5 transition-transform ${journalCloudOpen ? "rotate-90" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  Journals{filters.journals?.length ? ` (${filters.journals.length})` : ""}
-                </button>
-                <button
-                  onClick={() => setFilters({ journals: undefined })}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                    !filters.journals?.length
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                      : "border-gray-300 text-gray-600 hover:border-gray-400 dark:border-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  All journals
-                </button>
-              </div>
-              {journalCloudOpen && (
-                <JournalCloud
-                  journals={JOURNALS}
-                  activeJournals={filters.journals || []}
-                  onToggle={toggleJournal}
-                  paperCounts={paperCounts}
-                />
-              )}
             </div>
           </div>
 

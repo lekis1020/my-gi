@@ -1,42 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Menu, Stethoscope } from "lucide-react";
-import { useMobileDrawer } from "@/components/layout/mobile-drawer-context";
+import { Stethoscope } from "lucide-react";
 
 export function Header() {
-  const { toggle } = useMobileDrawer();
-
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur dark:border-gray-800 dark:bg-gray-950/90">
       <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggle}
-            className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 lg:hidden"
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300">
-              <Stethoscope className="h-4 w-4" />
-            </div>
-            <span className="text-base font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-              My GI
-            </span>
-          </Link>
-        </div>
-
-        <nav className="hidden items-center gap-2 sm:flex">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-          >
-            <Home className="h-4 w-4" />
-            Home
-          </Link>
-        </nav>
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300">
+            <Stethoscope className="h-4 w-4" />
+          </div>
+          <span className="text-base font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+            My GI
+          </span>
+        </Link>
       </div>
     </header>
   );

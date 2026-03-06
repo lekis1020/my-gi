@@ -8,7 +8,8 @@ import { getPubMedUrl, getDoiUrl } from "@/lib/utils/url";
 import { TOPIC_META } from "@/lib/utils/topic-tags";
 import { decodeHtmlEntities } from "@/lib/utils/html-entities";
 import type { PaperWithJournal } from "@/types/filters";
-import { ExternalLink, Quote, Users } from "lucide-react";
+import { ExternalLink, Quote, Users, Bookmark } from "lucide-react";
+import { useSavedPapers } from "@/hooks/use-paper-interactions";
 
 interface PaperCardProps {
   paper: PaperWithJournal;
@@ -16,6 +17,8 @@ interface PaperCardProps {
 
 export function PaperCard({ paper }: PaperCardProps) {
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
+  const { isSaved, toggleSave } = useSavedPapers();
+  const saved = isSaved(paper.pmid);
   const avatarLabel = paper.journal_abbreviation
     .split(" ")
     .slice(0, 2)
@@ -139,6 +142,27 @@ export function PaperCard({ paper }: PaperCardProps) {
                 {formatCitationCount(paper.citation_count)} citations
               </span>
             )}
+            <button
+              onClick={() =>
+                toggleSave({
+                  pmid: paper.pmid,
+                  title: paper.title,
+                  journal_abbreviation: paper.journal_abbreviation,
+                  journal_color: paper.journal_color,
+                  journal_slug: paper.journal_slug,
+                  publication_date: paper.publication_date,
+                  doi: paper.doi,
+                })
+              }
+              className={`ml-auto flex items-center gap-1 rounded-full px-2 py-1 transition-colors ${
+                saved
+                  ? "text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}
+              aria-label={saved ? "Remove bookmark" : "Bookmark paper"}
+            >
+              <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+            </button>
           </div>
         </div>
       </div>

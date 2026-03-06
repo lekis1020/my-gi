@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/date";
 import { getPubMedUrl, getDoiUrl } from "@/lib/utils/url";
 import { TOPIC_META } from "@/lib/utils/topic-tags";
 import type { TopicTag, AuthorSummary } from "@/types/filters";
-import { ArrowLeft, ExternalLink, Quote, BookOpen, Users, Calendar, Hash } from "lucide-react";
+import { ArrowLeft, ExternalLink, Quote, BookOpen, Users, Calendar, Hash, Bookmark } from "lucide-react";
+import { useSavedPapers, useReadPapers } from "@/hooks/use-paper-interactions";
 
 interface PaperDetail {
   id: string;
@@ -23,12 +25,32 @@ interface PaperDetail {
   journal_name: string;
   journal_abbreviation: string;
   journal_color: string;
+  journal_slug: string;
   journal_impact_factor: number | null;
   topic_tags: TopicTag[];
   authors: AuthorSummary[];
 }
 
 export function PaperDetailView({ paper }: { paper: PaperDetail }) {
+  const { isSaved, toggleSave } = useSavedPapers();
+  const { markAsRead } = useReadPapers();
+  const saved = isSaved(paper.pmid);
+
+  const interactionData = {
+    pmid: paper.pmid,
+    title: paper.title,
+    journal_abbreviation: paper.journal_abbreviation,
+    journal_color: paper.journal_color,
+    journal_slug: paper.journal_slug,
+    publication_date: paper.publication_date,
+    doi: paper.doi,
+  };
+
+  useEffect(() => {
+    markAsRead(interactionData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paper.pmid]);
+
   const citation = [
     paper.journal_abbreviation,
     paper.volume && `${paper.volume}`,
@@ -139,6 +161,17 @@ export function PaperDetailView({ paper }: { paper: PaperDetail }) {
                   DOI <ExternalLink className="h-3 w-3" />
                 </a>
               )}
+              <button
+                onClick={() => toggleSave(interactionData)}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                  saved
+                    ? "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                }`}
+              >
+                <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+                {saved ? "Saved" : "Save"}
+              </button>
             </div>
           </div>
 
