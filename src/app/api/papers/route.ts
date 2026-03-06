@@ -30,6 +30,76 @@ export async function GET(request: NextRequest) {
   }
 
   const searchParams = request.nextUrl.searchParams;
+
+  // Fetch specific papers by IDs (for bookmarks page)
+  const idsParam = searchParams.get("ids");
+  if (idsParam) {
+    const ids = idsParam.split(",").filter(Boolean).slice(0, 100);
+    if (ids.length === 0) {
+      return NextResponse.json({ papers: [] });
+    }
+    const supabaseById = createAnonClient();
+    const { data: idData, error: idError } = await supabaseById
+      .from("papers")
+      .select(
+        `
+        id, pmid, doi, title, abstract, publication_date,
+        volume, issue, pages, keywords, mesh_terms, citation_count, journal_id,
+        journals!inner (id, name, abbreviation, color, slug),
+        paper_authors (last_name, first_name, initials, affiliation, position)
+      `
+      )
+      .in("id", ids)
+      .order("position", { referencedTable: "paper_authors", ascending: true });
+
+    if (idError) {
+      return NextResponse.json({ error: "Failed to fetch papers" }, { status: 500 });
+    }
+
+    const idPapers = (idData || []).map((paper: Record<string, unknown>) => {
+      const journal = paper.journals as Record<string, unknown>;
+      const authors = (paper.paper_authors as Record<string, unknown>[]) || [];
+      const keywords = Array.isArray(paper.keywords)
+        ? paper.keywords.filter((k): k is string => typeof k === "string").map(decodeHtmlEntities)
+        : [];
+      const meshTerms = Array.isArray(paper.mesh_terms)
+        ? paper.mesh_terms.filter((t): t is string => typeof t === "string").map(decodeHtmlEntities)
+        : [];
+      const decodedTitle = decodeHtmlEntities(String(paper.title ?? ""));
+      const decodedAbstract =
+        typeof paper.abstract === "string" ? decodeHtmlEntities(paper.abstract) : null;
+      return {
+        id: paper.id,
+        pmid: paper.pmid,
+        doi: paper.doi,
+        title: decodedTitle,
+        abstract: decodedAbstract,
+        publication_date: paper.publication_date,
+        volume: paper.volume,
+        issue: paper.issue,
+        pages: paper.pages,
+        keywords,
+        mesh_terms: meshTerms,
+        citation_count: paper.citation_count,
+        journal_id: paper.journal_id,
+        journal_name: journal.name,
+        journal_abbreviation: journal.abbreviation,
+        journal_color: journal.color,
+        journal_slug: journal.slug,
+        topic_tags: classifyPaperTopics({ title: decodedTitle, abstract: decodedAbstract, keywords, meshTerms }),
+        authors: authors.map((a: Record<string, unknown>) => ({
+          last_name: a.last_name,
+          first_name: a.first_name,
+          initials: a.initials,
+          affiliation: a.affiliation,
+          position: a.position,
+        })),
+      };
+    });
+
+    return NextResponse.json({ papers: idPapers });
+  }
+
   const q = searchParams.get("q") || "";
   const journals = searchParams.get("journals") || "";
   const from = searchParams.get("from") || "";

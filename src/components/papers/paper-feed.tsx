@@ -14,6 +14,11 @@ interface PaperFeedProps {
   isLoading: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  bookmarkedIds?: Set<string>;
+  readIds?: Set<string>;
+  onToggleBookmark?: (paperId: string) => void;
+  onMarkAsRead?: (paperId: string) => void;
+  isLoggedIn?: boolean;
 }
 
 export function PaperFeed({
@@ -23,6 +28,11 @@ export function PaperFeed({
   isLoading,
   isLoadingMore,
   onLoadMore,
+  bookmarkedIds,
+  readIds,
+  onToggleBookmark,
+  onMarkAsRead,
+  isLoggedIn = false,
 }: PaperFeedProps) {
   const observerRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +90,14 @@ export function PaperFeed({
       <div className="divide-y divide-gray-200 dark:divide-gray-800">
         {papers.map((paper, index) => (
           <div key={paper.id}>
-            <PaperCard paper={paper} />
+            <PaperCard
+              paper={paper}
+              isBookmarked={bookmarkedIds?.has(paper.id)}
+              isRead={readIds?.has(paper.id)}
+              onToggleBookmark={onToggleBookmark}
+              onMarkAsRead={onMarkAsRead}
+              isLoggedIn={isLoggedIn}
+            />
             {(index + 1) % 5 === 0 && (
               <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/50">
                 <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-400">Ad</p>
