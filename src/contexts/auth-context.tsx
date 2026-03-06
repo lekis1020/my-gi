@@ -5,10 +5,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import type { User, Session, SupabaseClient } from "@supabase/supabase-js";
 
 interface AuthContextValue {
   user: User | null;
@@ -26,9 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+  const supabase = useMemo<SupabaseClient | null>(() => {
+    if (typeof window === "undefined") return null;
+    return createClient();
+  }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -49,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const signInWithGoogle = useCallback(async () => {
+    if (!supabase) return;
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -59,6 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithEmail = useCallback(
     async (email: string, password: string) => {
+      if (!supabase) return { error: "Client not initialized" };
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -70,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUpWithEmail = useCallback(
     async (email: string, password: string) => {
+      if (!supabase) return { error: "Client not initialized" };
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -83,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
   }, [supabase]);
 
