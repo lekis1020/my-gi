@@ -12,13 +12,11 @@ type Tab = "topics" | "insights";
 interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
-  // Optional TopicMonitorPanel props (standalone mode if omitted)
   activeQuery?: string;
-  onActivate?: (topic: string) => void;
-  onClearActive?: () => void;
-  // RightRail props
-  total?: number;
-  papers?: PaperWithJournal[];
+  onActivate: (topic: string) => void;
+  onClearActive: () => void;
+  total: number;
+  papers: PaperWithJournal[];
 }
 
 export function MobileDrawer({
@@ -27,8 +25,8 @@ export function MobileDrawer({
   activeQuery,
   onActivate,
   onClearActive,
-  total = 0,
-  papers = [],
+  total,
+  papers,
 }: MobileDrawerProps) {
   const [tab, setTab] = useState<Tab>("topics");
 

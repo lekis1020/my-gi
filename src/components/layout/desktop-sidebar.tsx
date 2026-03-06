@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Home, Bookmark, User, LogIn, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useInsightsDrawer } from "@/components/layout/insights-drawer-context";
@@ -31,6 +31,22 @@ function NavLink({
       <Icon className="h-5 w-5" />
       {label}
     </Link>
+  );
+}
+
+/** Wrapper that reads topic state from URL params */
+function StandaloneTopicPanel() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const activeQuery = searchParams.get("q") ?? undefined;
+
+  return (
+    <TopicMonitorPanel
+      activeQuery={activeQuery}
+      onActivate={(topic) => router.push(`/?q=${encodeURIComponent(topic)}`)}
+      onClearActive={() => router.push("/")}
+    />
   );
 }
 
@@ -85,7 +101,7 @@ export function DesktopSidebar() {
       {/* Topics — scrollable */}
       <div className="flex-1 overflow-y-auto px-3 pb-4">
         <Suspense fallback={null}>
-          <TopicMonitorPanel />
+          <StandaloneTopicPanel />
         </Suspense>
       </div>
     </aside>
