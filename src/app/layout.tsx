@@ -4,6 +4,7 @@ import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { MobileDrawerProvider } from "@/components/layout/mobile-drawer-context";
 import { AuthProvider } from "@/contexts/auth-context";
 
@@ -38,7 +39,8 @@ export default function RootLayout({
           <MobileDrawerProvider>
             <div className="flex min-h-screen flex-col">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1 pb-16 lg:pb-0">{children}</main>
+              <BottomNav />
               <Footer />
             </div>
           </MobileDrawerProvider>
