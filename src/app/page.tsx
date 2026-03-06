@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
 import { useMobileDrawer } from "@/components/layout/mobile-drawer-context";
 import { PaperFeed } from "@/components/papers/paper-feed";
