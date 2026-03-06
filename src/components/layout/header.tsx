@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Home, Menu, Sparkles, Stethoscope, LogIn, LogOut, User, Bookmark } from "lucide-react";
+import { Menu, Stethoscope, LogIn, LogOut, User, Bookmark } from "lucide-react";
 import { useMobileDrawer } from "@/components/layout/mobile-drawer-context";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -54,29 +54,6 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <nav className="hidden items-center gap-2 sm:flex">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Link>
-            {user && (
-              <Link
-                href="/bookmarks"
-                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-              >
-                <Bookmark className="h-4 w-4" />
-                Saved
-              </Link>
-            )}
-            <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-700 dark:bg-teal-900/20 dark:text-teal-300">
-              <Sparkles className="h-4 w-4" />
-              Live Sync
-            </span>
-          </nav>
-
           {/* Auth area */}
           {!isLoading && (
             <>

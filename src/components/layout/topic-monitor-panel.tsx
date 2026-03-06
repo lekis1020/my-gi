@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, FolderTree, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,15 +14,22 @@ const STORAGE_KEY = "my-gi:topic-monitors";
 
 interface TopicMonitorPanelProps {
   activeQuery?: string;
-  onActivate: (topic: string) => void;
-  onClearActive: () => void;
+  onActivate?: (topic: string) => void;
+  onClearActive?: () => void;
 }
 
 export function TopicMonitorPanel({
-  activeQuery,
-  onActivate,
-  onClearActive,
-}: TopicMonitorPanelProps) {
+  activeQuery: activeQueryProp,
+  onActivate: onActivateProp,
+  onClearActive: onClearActiveProp,
+}: TopicMonitorPanelProps = {}) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Standalone mode: read from URL when props not provided
+  const activeQuery = activeQueryProp ?? searchParams.get("q") ?? undefined;
+  const onActivate = onActivateProp ?? ((topic: string) => router.push(`/?q=${encodeURIComponent(topic)}`));
+  const onClearActive = onClearActiveProp ?? (() => router.push("/"));
   const { user } = useAuth();
   const {
     topics: serverTopics,

@@ -1,8 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { RightRail } from "@/components/layout/right-rail";
-import { TopicMonitorPanel } from "@/components/layout/topic-monitor-panel";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
 import { useMobileDrawer } from "@/components/layout/mobile-drawer-context";
 import { PaperFeed } from "@/components/papers/paper-feed";
@@ -64,17 +62,7 @@ function HomePage() {
         total={total}
         papers={papers}
       />
-      <div className="grid min-h-[calc(100vh-56px)] grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_320px]">
-        <div className="hidden lg:block lg:pr-4">
-          <div className="sticky top-20 max-h-[calc(100vh-96px)] overflow-y-auto pr-1">
-            <TopicMonitorPanel
-              activeQuery={filters.q}
-              onActivate={(topic) => setFilters({ q: topic, sort: "date_desc" })}
-              onClearActive={() => setFilters({ q: undefined })}
-            />
-          </div>
-        </div>
-
+      <div className="mx-auto min-h-[calc(100vh-56px)] max-w-[700px]">
         <div className="min-w-0 border-x border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
           <div className="sticky top-14 z-20 border-b border-gray-200 bg-white/95 backdrop-blur dark:border-gray-800 dark:bg-gray-950/90">
             <div className="px-4 pt-3">
@@ -171,11 +159,6 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="hidden xl:block xl:pl-4">
-          <div className="sticky top-20 max-h-[calc(100vh-96px)] overflow-y-auto pr-1">
-            <RightRail total={total} papers={papers} />
-          </div>
-        </div>
       </div>
     </div>
   );
