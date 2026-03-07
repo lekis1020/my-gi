@@ -12,22 +12,17 @@ export function AiSummary({ pmid }: AiSummaryProps) {
   const { user } = useAuth();
   const [summary, setSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Check for cached summary on mount (only for logged-in users)
   useEffect(() => {
-    if (!user) {
-      setChecking(false);
-      return;
-    }
+    if (!user) return;
     fetch(`/api/papers/${pmid}/summary`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.summary) setSummary(data.summary);
       })
-      .catch(() => {})
-      .finally(() => setChecking(false));
+      .catch(() => {});
   }, [pmid, user]);
 
   async function handleGenerate() {
@@ -47,9 +42,6 @@ export function AiSummary({ pmid }: AiSummaryProps) {
       setLoading(false);
     }
   }
-
-  // Still checking for cached summary
-  if (checking) return null;
 
   // Show summary if it exists
   if (summary) {
