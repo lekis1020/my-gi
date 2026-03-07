@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FolderTree, BarChart3, Bookmark, User } from "lucide-react";
+import { Home, FolderTree, BarChart3, CalendarDays, Bookmark, User } from "lucide-react";
 
 const tabs = [
   { href: "/", label: "Home", icon: Home },
   { href: "/topics", label: "Topics", icon: FolderTree },
   { href: "/insights", label: "Insights", icon: BarChart3 },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/saved", label: "Saved", icon: Bookmark },
   { href: "/account", label: "Account", icon: User },
 ] as const;
