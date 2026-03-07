@@ -38,10 +38,10 @@ export async function GET(
 
   const supabase = createServiceClient();
 
-  // Fetch paper
+  // Fetch paper basics
   const { data: paper, error } = await supabase
     .from("papers")
-    .select("id, title, abstract, summary_ko")
+    .select("id, title, abstract")
     .eq("pmid", pmid)
     .single();
 
@@ -49,9 +49,15 @@ export async function GET(
     return NextResponse.json({ error: "Paper not found" }, { status: 404 });
   }
 
-  // Return cached summary if exists
-  if (paper.summary_ko) {
-    return NextResponse.json({ summary: paper.summary_ko });
+  // Check for cached summary (separate query to avoid schema cache issues)
+  const { data: summaryRow } = await supabase
+    .from("papers")
+    .select("summary_ko")
+    .eq("id", paper.id)
+    .single();
+
+  if (summaryRow?.summary_ko) {
+    return NextResponse.json({ summary: summaryRow.summary_ko });
   }
 
   // No abstract to summarize

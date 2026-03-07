@@ -25,7 +25,6 @@ interface PaperDetail {
   keywords: string[];
   mesh_terms: string[];
   citation_count: number | null;
-  summary_ko: string | null;
   journal_name: string;
   journal_abbreviation: string;
   journal_color: string;
@@ -180,7 +179,7 @@ export function PaperDetailView({ paper }: { paper: PaperDetail }) {
 
           {paper.abstract && (
             <>
-              <AiSummary pmid={paper.pmid} initialSummary={paper.summary_ko} />
+              <AiSummary pmid={paper.pmid} />
               <section className="mt-4 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
                 <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Abstract

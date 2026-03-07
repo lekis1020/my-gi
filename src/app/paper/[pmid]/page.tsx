@@ -17,7 +17,7 @@ async function getPaper(pmid: string) {
     .select(
       `
       id, pmid, doi, title, abstract, publication_date,
-      volume, issue, pages, keywords, mesh_terms, citation_count, summary_ko, journal_id,
+      volume, issue, pages, keywords, mesh_terms, citation_count, journal_id,
       journals!inner (id, name, abbreviation, color, slug, impact_factor),
       paper_authors (last_name, first_name, initials, affiliation, position)
     `
@@ -59,7 +59,6 @@ async function getPaper(pmid: string) {
     keywords,
     mesh_terms: meshTerms,
     citation_count: data.citation_count as number | null,
-    summary_ko: (data.summary_ko as string) || null,
     journal_id: data.journal_id as string,
     journal_name: journal.name as string,
     journal_abbreviation: journal.abbreviation as string,
