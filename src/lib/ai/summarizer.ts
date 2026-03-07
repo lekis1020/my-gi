@@ -91,14 +91,14 @@ export async function summarizeAndStore(
 ): Promise<string> {
   const summary = await generateSummary(title, abstract);
 
+  // Try to cache in DB; if it fails (e.g. schema cache), still return the summary
   const { error } = await supabase
     .from("papers")
     .update({ summary_ko: summary })
     .eq("id", paperId);
 
   if (error) {
-    console.error("Failed to store summary:", error);
-    throw new Error("Failed to store summary");
+    console.error("Failed to cache summary (will still return it):", error);
   }
 
   return summary;
