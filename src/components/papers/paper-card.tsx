@@ -13,9 +13,21 @@ import { useSavedPapers } from "@/hooks/use-paper-interactions";
 
 interface PaperCardProps {
   paper: PaperWithJournal;
+  isBookmarked?: boolean;
+  isRead?: boolean;
+  onToggleBookmark?: (paperId: string) => void;
+  onMarkAsRead?: (paperId: string) => void;
+  isLoggedIn?: boolean;
 }
 
-export function PaperCard({ paper }: PaperCardProps) {
+export function PaperCard({
+  paper,
+  isBookmarked = false,
+  isRead = false,
+  onToggleBookmark,
+  onMarkAsRead,
+  isLoggedIn = false,
+}: PaperCardProps) {
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
   const { isSaved, toggleSave } = useSavedPapers();
   const saved = isSaved(paper.pmid);
@@ -27,8 +39,18 @@ export function PaperCard({ paper }: PaperCardProps) {
     .toUpperCase();
   const hasAbstract = Boolean(paper.abstract && paper.abstract.trim().length > 0);
 
+  const handleTitleClick = () => {
+    if (onMarkAsRead && !isRead) {
+      onMarkAsRead(paper.id);
+    }
+  };
+
   return (
-    <article className="px-4 py-4 transition-colors hover:bg-gray-50/70 dark:hover:bg-gray-900/70">
+    <article
+      className={`px-4 py-4 transition-colors hover:bg-gray-50/70 dark:hover:bg-gray-900/70 ${
+        isRead ? "opacity-70" : ""
+      }`}
+    >
       <div className="flex gap-3">
         <div
           className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
@@ -51,9 +73,33 @@ export function PaperCard({ paper }: PaperCardProps) {
             <span className="text-gray-500 dark:text-gray-400">
               {formatRelativeDate(paper.publication_date)}
             </span>
+            {isRead && (
+              <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                <CheckCircle2 className="h-3 w-3" />
+                Read
+              </span>
+            )}
+            {isLoggedIn && (
+              <button
+                onClick={() => onToggleBookmark?.(paper.id)}
+                className={`ml-auto rounded-full p-1.5 transition-colors ${
+                  isBookmarked
+                    ? "text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                    : "text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                }`}
+                aria-label={isBookmarked ? "Remove bookmark" : "Bookmark paper"}
+                title={isBookmarked ? "Remove bookmark" : "Save paper"}
+              >
+                {isBookmarked ? (
+                  <BookmarkCheck className="h-4 w-4" />
+                ) : (
+                  <Bookmark className="h-4 w-4" />
+                )}
+              </button>
+            )}
           </div>
 
-          <Link href={`/paper/${paper.pmid}`}>
+          <Link href={`/paper/${paper.pmid}`} onClick={handleTitleClick}>
             <h3 className="mb-2 text-[15px] font-semibold leading-snug text-gray-900 transition-colors hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400">
               {decodeHtmlEntities(paper.title)}
             </h3>

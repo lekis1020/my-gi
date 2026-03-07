@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TOPIC_TREE, BUILTIN_QUERIES } from "@/lib/constants/topics";
 import type { TopicCategory, SubTopic } from "@/lib/constants/topics";
+import { useAuth } from "@/contexts/auth-context";
+import { useUserTopics } from "@/hooks/use-user-topics";
 
 const STORAGE_KEY = "my-gi:topic-monitors";
 
@@ -20,13 +22,24 @@ export function TopicMonitorPanel({
   onActivate,
   onClearActive,
 }: TopicMonitorPanelProps) {
-  const [customTopics, setCustomTopics] = useState<string[]>([]);
+  const { user } = useAuth();
+  const {
+    topics: serverTopics,
+    addTopic: addServerTopic,
+    removeTopic: removeServerTopic,
+  } = useUserTopics();
+
+  const [localTopics, setLocalTopics] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const normalizedActive = normalizeTopic(activeQuery || "");
 
-  // Load custom topics from localStorage (migrating away built-in duplicates)
+  // Use server topics when logged in, localStorage otherwise
+  const customTopics = user ? serverTopics : localTopics;
+
+  // Load custom topics from localStorage for non-logged-in users
   useEffect(() => {
+    if (user) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return;
@@ -41,19 +54,20 @@ export function TopicMonitorPanel({
         .slice(0, 30);
 
       if (clean.length > 0) {
-        setCustomTopics(dedupeTopics(clean));
+        setLocalTopics(dedupeTopics(clean));
       }
 
-      // Persist migrated list (remove built-in dupes)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
     } catch {
       // Ignore malformed localStorage values
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(customTopics));
-  }, [customTopics]);
+    if (!user) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localTopics));
+    }
+  }, [localTopics, user]);
 
   // Auto-expand category that contains the active query
   useEffect(() => {
@@ -88,7 +102,11 @@ export function TopicMonitorPanel({
     const clean = input.trim();
     if (!clean) return;
     if (!BUILTIN_QUERIES.has(clean.toLowerCase())) {
-      setCustomTopics((prev) => dedupeTopics([clean, ...prev]).slice(0, 30));
+      if (user) {
+        addServerTopic(clean);
+      } else {
+        setLocalTopics((prev) => dedupeTopics([clean, ...prev]).slice(0, 30));
+      }
     }
     setInput("");
     onActivate(clean);
@@ -96,9 +114,13 @@ export function TopicMonitorPanel({
 
   const removeCustomTopic = (topic: string) => {
     const normalized = normalizeTopic(topic);
-    setCustomTopics((prev) =>
-      prev.filter((item) => normalizeTopic(item) !== normalized)
-    );
+    if (user) {
+      removeServerTopic(topic);
+    } else {
+      setLocalTopics((prev) =>
+        prev.filter((item) => normalizeTopic(item) !== normalized)
+      );
+    }
     if (normalizedActive === normalized) {
       onClearActive();
     }
@@ -214,7 +236,9 @@ export function TopicMonitorPanel({
         )}
 
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          Custom topics are saved in this browser.
+          {user
+            ? "Topics synced to your account."
+            : "Log in to sync topics across devices."}
         </p>
       </section>
     </aside>

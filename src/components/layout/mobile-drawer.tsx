@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState } from "react";
 import { X, FolderTree, BarChart3 } from "lucide-react";
+import { Suspense } from "react";
 import { TopicMonitorPanel } from "@/components/layout/topic-monitor-panel";
 import { RightRail } from "@/components/layout/right-rail";
 import type { PaperWithJournal } from "@/types/filters";
@@ -11,11 +12,9 @@ type Tab = "topics" | "insights";
 interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
-  // TopicMonitorPanel props
   activeQuery?: string;
   onActivate: (topic: string) => void;
   onClearActive: () => void;
-  // RightRail props
   total: number;
   papers: PaperWithJournal[];
 }
@@ -121,11 +120,13 @@ export function MobileDrawer({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4">
           {tab === "topics" ? (
-            <TopicMonitorPanel
-              activeQuery={activeQuery}
-              onActivate={onActivate}
-              onClearActive={onClearActive}
-            />
+            <Suspense fallback={null}>
+              <TopicMonitorPanel
+                activeQuery={activeQuery}
+                onActivate={onActivate}
+                onClearActive={onClearActive}
+              />
+            </Suspense>
           ) : (
             <RightRail total={total} papers={papers} />
           )}
