@@ -6,8 +6,10 @@ import { formatDate } from "@/lib/utils/date";
 import { getPubMedUrl, getDoiUrl } from "@/lib/utils/url";
 import { TOPIC_META } from "@/lib/utils/topic-tags";
 import type { TopicTag, AuthorSummary } from "@/types/filters";
-import { ArrowLeft, ExternalLink, Quote, BookOpen, Users, Calendar, Hash, Bookmark } from "lucide-react";
-import { useSavedPapers, useReadPapers } from "@/hooks/use-paper-interactions";
+import { ArrowLeft, ExternalLink, Quote, BookOpen, Users, Calendar, Hash, Bookmark, BookmarkCheck } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { useBookmarks } from "@/hooks/use-bookmarks";
+import { useReadPapers } from "@/hooks/use-read-papers";
 
 interface PaperDetail {
   id: string;
@@ -32,24 +34,17 @@ interface PaperDetail {
 }
 
 export function PaperDetailView({ paper }: { paper: PaperDetail }) {
-  const { isSaved, toggleSave } = useSavedPapers();
+  const { user } = useAuth();
+  const { bookmarkedIds, toggleBookmark } = useBookmarks();
   const { markAsRead } = useReadPapers();
-  const saved = isSaved(paper.pmid);
-
-  const interactionData = {
-    pmid: paper.pmid,
-    title: paper.title,
-    journal_abbreviation: paper.journal_abbreviation,
-    journal_color: paper.journal_color,
-    journal_slug: paper.journal_slug,
-    publication_date: paper.publication_date,
-    doi: paper.doi,
-  };
+  const isBookmarked = bookmarkedIds.has(paper.id);
 
   useEffect(() => {
-    markAsRead(interactionData);
+    if (user) {
+      markAsRead(paper.id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paper.pmid]);
+  }, [paper.id, user]);
 
   const citation = [
     paper.journal_abbreviation,
@@ -161,17 +156,23 @@ export function PaperDetailView({ paper }: { paper: PaperDetail }) {
                   DOI <ExternalLink className="h-3 w-3" />
                 </a>
               )}
-              <button
-                onClick={() => toggleSave(interactionData)}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                  saved
-                    ? "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                }`}
-              >
-                <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
-                {saved ? "Saved" : "Save"}
-              </button>
+              {user && (
+                <button
+                  onClick={() => toggleBookmark(paper.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                    isBookmarked
+                      ? "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {isBookmarked ? (
+                    <BookmarkCheck className="h-4 w-4" />
+                  ) : (
+                    <Bookmark className="h-4 w-4" />
+                  )}
+                  {isBookmarked ? "Saved" : "Save"}
+                </button>
+              )}
             </div>
           </div>
 
