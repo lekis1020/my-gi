@@ -10,6 +10,7 @@ import { ArrowLeft, ExternalLink, Quote, BookOpen, Users, Calendar, Hash, Bookma
 import { useAuth } from "@/contexts/auth-context";
 import { useBookmarks } from "@/hooks/use-bookmarks";
 import { useReadPapers } from "@/hooks/use-read-papers";
+import { AiSummary } from "@/components/paper/ai-summary";
 
 interface PaperDetail {
   id: string;
@@ -24,6 +25,7 @@ interface PaperDetail {
   keywords: string[];
   mesh_terms: string[];
   citation_count: number | null;
+  summary_ko: string | null;
   journal_name: string;
   journal_abbreviation: string;
   journal_color: string;
@@ -177,14 +179,17 @@ export function PaperDetailView({ paper }: { paper: PaperDetail }) {
           </div>
 
           {paper.abstract && (
-            <section className="mt-4 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Abstract
-              </h2>
-              <p className="whitespace-pre-line text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
-                {paper.abstract}
-              </p>
-            </section>
+            <>
+              <AiSummary pmid={paper.pmid} initialSummary={paper.summary_ko} />
+              <section className="mt-4 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Abstract
+                </h2>
+                <p className="whitespace-pre-line text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+                  {paper.abstract}
+                </p>
+              </section>
+            </>
           )}
 
           {paper.authors.length > 0 && (

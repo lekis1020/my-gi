@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { syncAllJournals } from "@/lib/sync/orchestrator";
+import { batchSummarize } from "@/lib/ai/summarizer";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -27,10 +28,17 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const results = await syncAllJournals(supabase, { days: cronSyncDays });
 
+    // Batch summarize new papers (up to 20 per cron run)
+    let summaryResults = { summarized: 0, errors: 0 };
+    if (process.env.OPENAI_API_KEY) {
+      summaryResults = await batchSummarize(supabase, 20);
+    }
+
     return NextResponse.json({
       success: true,
       days: cronSyncDays,
       results,
+      summaries: summaryResults,
     });
   } catch (error) {
     console.error("Cron sync error:", error);
