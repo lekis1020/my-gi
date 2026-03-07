@@ -8,8 +8,7 @@ import { getPubMedUrl, getDoiUrl } from "@/lib/utils/url";
 import { TOPIC_META } from "@/lib/utils/topic-tags";
 import { decodeHtmlEntities } from "@/lib/utils/html-entities";
 import type { PaperWithJournal } from "@/types/filters";
-import { ExternalLink, Quote, Users, Bookmark } from "lucide-react";
-import { useSavedPapers } from "@/hooks/use-paper-interactions";
+import { ExternalLink, Quote, Users, Bookmark, BookmarkCheck, CheckCircle2 } from "lucide-react";
 
 interface PaperCardProps {
   paper: PaperWithJournal;
@@ -29,8 +28,6 @@ export function PaperCard({
   isLoggedIn = false,
 }: PaperCardProps) {
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
-  const { isSaved, toggleSave } = useSavedPapers();
-  const saved = isSaved(paper.pmid);
   const avatarLabel = paper.journal_abbreviation
     .split(" ")
     .slice(0, 2)
@@ -181,35 +178,14 @@ export function PaperCard({
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
-            {paper.citation_count !== null && paper.citation_count > 0 && (
+          {paper.citation_count !== null && paper.citation_count > 0 && (
+            <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">
                 <Quote className="h-3.5 w-3.5" />
                 {formatCitationCount(paper.citation_count)} citations
               </span>
-            )}
-            <button
-              onClick={() =>
-                toggleSave({
-                  pmid: paper.pmid,
-                  title: paper.title,
-                  journal_abbreviation: paper.journal_abbreviation,
-                  journal_color: paper.journal_color,
-                  journal_slug: paper.journal_slug,
-                  publication_date: paper.publication_date,
-                  doi: paper.doi,
-                })
-              }
-              className={`ml-auto flex items-center gap-1 rounded-full px-2 py-1 transition-colors ${
-                saved
-                  ? "text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              }`}
-              aria-label={saved ? "Remove bookmark" : "Bookmark paper"}
-            >
-              <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </article>

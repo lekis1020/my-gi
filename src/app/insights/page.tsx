@@ -1,11 +1,22 @@
 "use client";
 
 import { Suspense } from "react";
+import useSWR from "swr";
 import { RightRail } from "@/components/layout/right-rail";
 import { usePapers } from "@/hooks/use-papers";
 
+const countFetcher = (url: string) => fetch(url).then((res) => res.json());
+
 function InsightsPage() {
-  const { papers, total } = usePapers({ sort: "date_desc", limit: 20 });
+  const { papers } = usePapers({ sort: "date_desc", limit: 20 });
+
+  // Fetch total count separately without abstract filter limitation
+  const { data: countData } = useSWR(
+    "/api/papers?limit=1",
+    countFetcher,
+    { revalidateOnFocus: false }
+  );
+  const total = countData?.total ?? 0;
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pb-24 pt-4 lg:pb-4">

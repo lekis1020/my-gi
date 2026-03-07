@@ -7,12 +7,18 @@ import { PaperFeed } from "@/components/papers/paper-feed";
 import { FilterBar } from "@/components/papers/filter-bar";
 import { usePapers } from "@/hooks/use-papers";
 import { JOURNALS } from "@/lib/constants/journals";
+import { useBookmarks } from "@/hooks/use-bookmarks";
+import { useReadPapers } from "@/hooks/use-read-papers";
+import { useAuth } from "@/contexts/auth-context";
 import { PaperCardSkeleton } from "@/components/ui/skeleton";
 import type { PaperFilters } from "@/types/filters";
 
 function TopicsPage() {
   const [query, setQuery] = useState<string | undefined>();
   const [journals, setJournals] = useState<string[]>([]);
+  const { user } = useAuth();
+  const { bookmarkedIds, toggleBookmark } = useBookmarks();
+  const { readIds, markAsRead } = useReadPapers();
   const [journalCloudOpen, setJournalCloudOpen] = useState(true);
 
   const filters: PaperFilters = useMemo(
@@ -121,6 +127,11 @@ function TopicsPage() {
           isLoading={isLoading}
           isLoadingMore={isLoadingMore ?? false}
           onLoadMore={loadMore}
+          bookmarkedIds={bookmarkedIds}
+          readIds={readIds}
+          onToggleBookmark={toggleBookmark}
+          onMarkAsRead={markAsRead}
+          isLoggedIn={!!user}
         />
       </div>
     </div>
