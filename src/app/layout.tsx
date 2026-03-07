@@ -5,7 +5,10 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { DesktopSidebar } from "@/components/layout/desktop-sidebar";
+import { InsightsDrawer } from "@/components/layout/insights-drawer";
 import { MobileDrawerProvider } from "@/components/layout/mobile-drawer-context";
+import { InsightsDrawerProvider } from "@/components/layout/insights-drawer-context";
 import { AuthProvider } from "@/contexts/auth-context";
 
 const manrope = Manrope({
@@ -37,12 +40,16 @@ export default function RootLayout({
       <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
         <AuthProvider>
           <MobileDrawerProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-1 pb-16 lg:pb-0">{children}</main>
-              <BottomNav />
-              <Footer />
-            </div>
+            <InsightsDrawerProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <DesktopSidebar />
+                <InsightsDrawer />
+                <main className="flex-1 pb-16 lg:ml-[260px] lg:pb-0">{children}</main>
+                <BottomNav />
+                <Footer />
+              </div>
+            </InsightsDrawerProvider>
           </MobileDrawerProvider>
         </AuthProvider>
         <Script
