@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Bookmark, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
@@ -17,7 +17,9 @@ type Tab = "bookmarked" | "read";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function SavedPage() {
-  const [tab, setTab] = useState<Tab>("bookmarked");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === "read" ? "read" : "bookmarked";
+  const [tab, setTab] = useState<Tab>(initialTab);
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { bookmarkedIds, toggleBookmark } = useBookmarks();
