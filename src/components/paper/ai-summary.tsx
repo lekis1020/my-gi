@@ -1,19 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
 interface AiSummaryProps {
   pmid: string;
-  initialSummary: string | null;
 }
 
-export function AiSummary({ pmid, initialSummary }: AiSummaryProps) {
+export function AiSummary({ pmid }: AiSummaryProps) {
   const { user } = useAuth();
-  const [summary, setSummary] = useState(initialSummary);
+  const [summary, setSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check for cached summary on mount (only for logged-in users)
+  useEffect(() => {
+    if (!user) {
+      setChecking(false);
+      return;
+    }
+    fetch(`/api/papers/${pmid}/summary`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.summary) setSummary(data.summary);
+      })
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  }, [pmid, user]);
 
   async function handleGenerate() {
     setLoading(true);
@@ -33,6 +48,9 @@ export function AiSummary({ pmid, initialSummary }: AiSummaryProps) {
     }
   }
 
+  // Still checking for cached summary
+  if (checking) return null;
+
   // Show summary if it exists
   if (summary) {
     return (
@@ -44,7 +62,6 @@ export function AiSummary({ pmid, initialSummary }: AiSummaryProps) {
         <div className="prose prose-sm max-w-none text-gray-700 dark:prose-invert dark:text-gray-300">
           {summary.split("\n").map((line, i) => {
             if (!line.trim()) return <br key={i} />;
-            // Bold markdown: **text**
             const parts = line.split(/(\*\*[^*]+\*\*)/g);
             return (
               <p key={i} className="my-1 leading-relaxed">
