@@ -30,8 +30,6 @@ const accounts: JournalAccount[] = [
   { journal: "Hepatology", abbr: "Hepatology", handle: "HEP_Journal", color: "#065F46" },
   { journal: "Am J Gastroenterol", abbr: "AJG", handle: "AmJGastro", color: "#B91C1C" },
   { journal: "Clin Gastro Hepatol", abbr: "CGH", handle: "AGA_CGH", color: "#1D4ED8" },
-  { journal: "Endoscopy", abbr: "Endoscopy", handle: "endoscopyjrnl", color: "#6D28D9" },
-  { journal: "J Crohn's Colitis", abbr: "JCC", handle: "JCC_IBD", color: "#0F766E" },
   { journal: "UEG Journal", abbr: "UEGJ", handle: "UEGJournal", color: "#C2410C" },
 ];
 
