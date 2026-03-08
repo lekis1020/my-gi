@@ -9,88 +9,73 @@ interface Conference {
   location: string;
   url: string;
   color: string;
+  verified: string; // date when info was verified from official website
 }
 
+// All dates verified from official conference websites on 2026-03-08 using Scrapling
 const conferences: Conference[] = [
   {
     name: "ECCO",
     fullName: "European Crohn's and Colitis Organisation Congress",
-    date: "2026-02-25/2026-02-28",
-    location: "Vienna, Austria",
+    date: "2026-02-18/2026-02-21",
+    location: "Stockholm, Sweden",
     url: "https://ecco-ibd.eu",
     color: "#a855f7",
-  },
-  {
-    name: "ESGE Days",
-    fullName: "European Society of Gastrointestinal Endoscopy",
-    date: "2026-04-23/2026-04-25",
-    location: "Berlin, Germany",
-    url: "https://esge.com",
-    color: "#10b981",
+    verified: "2026-03-08",
   },
   {
     name: "DDW",
     fullName: "Digestive Disease Week",
-    date: "2026-05-16/2026-05-19",
-    location: "Washington, D.C., USA",
+    date: "2026-05-02/2026-05-05",
+    location: "Chicago, IL, USA",
     url: "https://ddw.org",
     color: "#3b82f6",
+    verified: "2026-03-08",
   },
   {
-    name: "KSGE",
-    fullName: "대한소화기내시경학회 세미나",
-    date: "2026-06-12/2026-06-14",
-    location: "Seoul, Korea",
-    url: "https://www.gie.or.kr",
-    color: "#f97316",
-  },
-  {
-    name: "UEGW",
-    fullName: "United European Gastroenterology Week",
-    date: "2026-10-03/2026-10-06",
-    location: "Vienna, Austria",
-    url: "https://ueg.eu",
-    color: "#6366f1",
+    name: "ESGE Days",
+    fullName: "European Society of Gastrointestinal Endoscopy",
+    date: "2026-05-14/2026-05-16",
+    location: "Milan, Italy",
+    url: "https://esgedays.org",
+    color: "#10b981",
+    verified: "2026-03-08",
   },
   {
     name: "ACG",
     fullName: "American College of Gastroenterology Annual Meeting",
-    date: "2026-10-23/2026-10-28",
-    location: "Las Vegas, NV, USA",
-    url: "https://gi.org",
+    date: "2026-10-09/2026-10-14",
+    location: "Nashville, TN, USA",
+    url: "https://acgmeetings.gi.org",
     color: "#f59e0b",
+    verified: "2026-03-08",
   },
   {
-    name: "JDDW",
-    fullName: "Japan Digestive Disease Week",
-    date: "2026-10-29/2026-11-01",
-    location: "Kobe, Japan",
-    url: "https://jddw.jp",
-    color: "#ef4444",
-  },
-  {
-    name: "KSG",
-    fullName: "대한소화기학회 추계학술대회",
-    date: "2026-11-06/2026-11-08",
-    location: "Seoul, Korea",
-    url: "https://www.gastrokorea.org",
-    color: "#0ea5e9",
-  },
-  {
-    name: "APDW",
-    fullName: "Asian Pacific Digestive Week",
-    date: "2026-11-12/2026-11-15",
-    location: "Kuala Lumpur, Malaysia",
-    url: "https://apdw2026.org",
-    color: "#f43f5e",
+    name: "UEGW",
+    fullName: "United European Gastroenterology Week",
+    date: "2026-10-17/2026-10-20",
+    location: "Barcelona, Spain",
+    url: "https://ueg.eu/week",
+    color: "#6366f1",
+    verified: "2026-03-08",
   },
   {
     name: "AASLD",
     fullName: "The Liver Meeting",
-    date: "2026-11-13/2026-11-17",
-    location: "Boston, MA, USA",
-    url: "https://aasld.org",
+    date: "2026-11-05/2026-11-09",
+    location: "Washington, D.C., USA",
+    url: "https://www.aasld.org/the-liver-meeting",
     color: "#14b8a6",
+    verified: "2026-03-08",
+  },
+  {
+    name: "JDDW",
+    fullName: "Japan Digestive Disease Week",
+    date: "2026-11-05/2026-11-07",
+    location: "Kobe, Japan",
+    url: "https://www.jddw.jp/jddw2026/en/index.html",
+    color: "#ef4444",
+    verified: "2026-03-08",
   },
 ];
 
@@ -140,7 +125,7 @@ export default function CalendarPage() {
         GI Conference Calendar
       </h1>
       <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-        {currentYear} major gastroenterology conferences
+        Verified from official websites
       </p>
 
       <div className="relative">
