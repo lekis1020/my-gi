@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { MapPin, ExternalLink, Circle, Globe, Flag } from "lucide-react";
 
 interface Conference {
@@ -154,12 +154,93 @@ function daysUntil(dateStr: string) {
   return Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function getMonthLabel(dateStr: string) {
+function getMonthKey(dateStr: string) {
   const { start } = parseDate(dateStr);
-  return start.toLocaleDateString("en-US", { month: "long" });
+  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function Timeline({ conferences }: { conferences: Conference[] }) {
+function getMonthShort(key: string) {
+  const [y, m] = key.split("-");
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+}
+
+function ConferenceCard({ conf }: { conf: Conference }) {
+  const status = getStatus(conf.date);
+  const days = daysUntil(conf.date);
+  const { start, end } = parseDate(conf.date);
+  const isSingleDay = conf.date.split("/")[0] === conf.date.split("/")[1];
+
+  return (
+    <a
+      href={conf.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block"
+    >
+      <div
+        className={`rounded-xl border p-3 transition-all group-hover:shadow-md ${
+          status === "past"
+            ? "border-gray-200 bg-gray-50/50 opacity-50 dark:border-gray-800 dark:bg-gray-900/30"
+            : status === "ongoing"
+              ? "border-2 bg-white dark:bg-gray-900"
+              : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+        }`}
+        style={status === "ongoing" ? { borderColor: conf.color } : undefined}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span
+                className="text-sm font-bold"
+                style={{
+                  color: status === "past" ? undefined : conf.color,
+                }}
+              >
+                {conf.name}
+              </span>
+              {status === "ongoing" && (
+                <span
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                  style={{ backgroundColor: conf.color }}
+                >
+                  LIVE
+                </span>
+              )}
+              {status === "upcoming" && days <= 90 && (
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                  D-{days}
+                </span>
+              )}
+              {status === "past" && (
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  Ended
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+              {conf.fullName}
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
+              <span>
+                {isSingleDay
+                  ? formatShortDate(start)
+                  : `${formatShortDate(start)} - ${formatShortDate(end)}`}
+              </span>
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {conf.location}
+              </span>
+            </div>
+          </div>
+          <ExternalLink className="mt-1 h-3.5 w-3.5 flex-shrink-0 text-gray-300 transition-colors group-hover:text-gray-500 dark:text-gray-600 dark:group-hover:text-gray-400" />
+        </div>
+      </div>
+    </a>
+  );
+}
+
+function MobileTimeline({ conferences }: { conferences: Conference[] }) {
   const currentYear = new Date().getFullYear();
   const filtered = conferences
     .filter((c) => parseDate(c.date).start.getFullYear() >= currentYear)
@@ -176,12 +257,9 @@ function Timeline({ conferences }: { conferences: Conference[] }) {
       <div className="space-y-0">
         {filtered.map((conf) => {
           const status = getStatus(conf.date);
-          const days = daysUntil(conf.date);
-          const { start, end } = parseDate(conf.date);
-          const month = getMonthLabel(conf.date);
-          const showMonth = month !== lastMonth;
-          lastMonth = month;
-          const isSingleDay = conf.date.split("/")[0] === conf.date.split("/")[1];
+          const mk = getMonthKey(conf.date);
+          const showMonth = mk !== lastMonth;
+          lastMonth = mk;
 
           return (
             <div key={conf.name}>
@@ -189,20 +267,12 @@ function Timeline({ conferences }: { conferences: Conference[] }) {
                 <div className="relative flex items-center pb-3 pt-1">
                   <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
                     <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-                      {start
-                        .toLocaleDateString("en-US", { month: "short" })
-                        .toUpperCase()}
+                      {getMonthShort(mk)}
                     </span>
                   </div>
                 </div>
               )}
-
-              <a
-                href={conf.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative flex gap-4 pb-6"
-              >
+              <div className="relative flex gap-4 pb-4">
                 <div className="relative z-10 flex h-10 w-10 flex-shrink-0 items-center justify-center">
                   {status === "ongoing" ? (
                     <span className="relative flex h-4 w-4">
@@ -219,7 +289,7 @@ function Timeline({ conferences }: { conferences: Conference[] }) {
                     <Circle
                       className="h-3 w-3"
                       fill={
-                        status === "past"
+                        getStatus(conf.date) === "past"
                           ? "var(--dot-fill, #d1d5db)"
                           : conf.color
                       }
@@ -227,70 +297,10 @@ function Timeline({ conferences }: { conferences: Conference[] }) {
                     />
                   )}
                 </div>
-
-                <div
-                  className={`min-w-0 flex-1 rounded-xl border p-3 transition-all group-hover:shadow-md ${
-                    status === "past"
-                      ? "border-gray-200 bg-gray-50/50 opacity-50 dark:border-gray-800 dark:bg-gray-900/30"
-                      : status === "ongoing"
-                        ? "border-2 bg-white dark:bg-gray-900"
-                        : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
-                  }`}
-                  style={
-                    status === "ongoing"
-                      ? { borderColor: conf.color }
-                      : undefined
-                  }
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="text-sm font-bold"
-                          style={{
-                            color: status === "past" ? undefined : conf.color,
-                          }}
-                        >
-                          {conf.name}
-                        </span>
-                        {status === "ongoing" && (
-                          <span
-                            className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white"
-                            style={{ backgroundColor: conf.color }}
-                          >
-                            LIVE
-                          </span>
-                        )}
-                        {status === "upcoming" && days <= 90 && (
-                          <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
-                            D-{days}
-                          </span>
-                        )}
-                        {status === "past" && (
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
-                            Ended
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                        {conf.fullName}
-                      </p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
-                        <span>
-                          {isSingleDay
-                            ? formatShortDate(start)
-                            : `${formatShortDate(start)} - ${formatShortDate(end)}`}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {conf.location}
-                        </span>
-                      </div>
-                    </div>
-                    <ExternalLink className="mt-1 h-3.5 w-3.5 flex-shrink-0 text-gray-300 transition-colors group-hover:text-gray-500 dark:text-gray-600 dark:group-hover:text-gray-400" />
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <ConferenceCard conf={conf} />
                 </div>
-              </a>
+              </div>
             </div>
           );
         })}
@@ -303,6 +313,47 @@ export default function CalendarPage() {
   const [tab, setTab] = useState<"international" | "domestic">(
     "international"
   );
+
+  const months = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const allConfs = [...international, ...domestic].filter(
+      (c) => parseDate(c.date).start.getFullYear() >= currentYear
+    );
+    const monthSet = new Set(allConfs.map((c) => getMonthKey(c.date)));
+    return Array.from(monthSet).sort();
+  }, []);
+
+  const intlByMonth = useMemo(() => {
+    const map: Record<string, Conference[]> = {};
+    const currentYear = new Date().getFullYear();
+    international
+      .filter((c) => parseDate(c.date).start.getFullYear() >= currentYear)
+      .sort(
+        (a, b) =>
+          parseDate(a.date).start.getTime() - parseDate(b.date).start.getTime()
+      )
+      .forEach((c) => {
+        const mk = getMonthKey(c.date);
+        (map[mk] ||= []).push(c);
+      });
+    return map;
+  }, []);
+
+  const domesticByMonth = useMemo(() => {
+    const map: Record<string, Conference[]> = {};
+    const currentYear = new Date().getFullYear();
+    domestic
+      .filter((c) => parseDate(c.date).start.getFullYear() >= currentYear)
+      .sort(
+        (a, b) =>
+          parseDate(a.date).start.getTime() - parseDate(b.date).start.getTime()
+      )
+      .forEach((c) => {
+        const mk = getMonthKey(c.date);
+        (map[mk] ||= []).push(c);
+      });
+    return map;
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-4 lg:pb-4">
@@ -339,30 +390,110 @@ export default function CalendarPage() {
         </button>
       </div>
 
-      {/* Mobile: single column */}
+      {/* Mobile: single timeline */}
       <div className="lg:hidden">
         {tab === "international" ? (
-          <Timeline conferences={international} />
+          <MobileTimeline conferences={international} />
         ) : (
-          <Timeline conferences={domestic} />
+          <MobileTimeline conferences={domestic} />
         )}
       </div>
 
-      {/* Desktop: two columns */}
-      <div className="hidden gap-8 lg:grid lg:grid-cols-2">
-        <div>
-          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      {/* Desktop: synchronized dual timeline */}
+      <div className="hidden lg:block">
+        {/* Column headers */}
+        <div className="mb-4 grid grid-cols-[1fr_48px_1fr] gap-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
             <Globe className="h-4 w-4" />
             International
           </div>
-          <Timeline conferences={international} />
-        </div>
-        <div>
-          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <div />
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
             <Flag className="h-4 w-4" />
             Domestic
           </div>
-          <Timeline conferences={domestic} />
+        </div>
+
+        {/* Synchronized rows */}
+        <div className="relative">
+          {/* Center timeline line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gray-200 dark:bg-gray-700" />
+
+          {months.map((mk) => {
+            const leftConfs = intlByMonth[mk] || [];
+            const rightConfs = domesticByMonth[mk] || [];
+
+            return (
+              <div key={mk}>
+                {/* Month label - centered */}
+                <div className="relative grid grid-cols-[1fr_48px_1fr] gap-4 pb-3 pt-1">
+                  <div />
+                  <div className="flex items-center justify-center">
+                    <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                        {getMonthShort(mk)}
+                      </span>
+                    </div>
+                  </div>
+                  <div />
+                </div>
+
+                {/* Conference cards row */}
+                <div className="relative grid grid-cols-[1fr_48px_1fr] gap-4 pb-2">
+                  {/* Left: international */}
+                  <div className="space-y-3">
+                    {leftConfs.map((conf) => (
+                      <ConferenceCard key={conf.name} conf={conf} />
+                    ))}
+                  </div>
+
+                  {/* Center: dots */}
+                  <div className="flex flex-col items-center">
+                    {(leftConfs.length > 0 || rightConfs.length > 0) && (
+                      <div className="flex flex-col items-center gap-3 pt-3">
+                        {[...leftConfs, ...rightConfs].map((conf) => {
+                          const status = getStatus(conf.date);
+                          return status === "ongoing" ? (
+                            <span
+                              key={conf.name}
+                              className="relative flex h-3 w-3"
+                            >
+                              <span
+                                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                                style={{ backgroundColor: conf.color }}
+                              />
+                              <span
+                                className="relative inline-flex h-3 w-3 rounded-full"
+                                style={{ backgroundColor: conf.color }}
+                              />
+                            </span>
+                          ) : (
+                            <Circle
+                              key={conf.name}
+                              className="h-2.5 w-2.5"
+                              fill={
+                                status === "past"
+                                  ? "var(--dot-fill, #d1d5db)"
+                                  : conf.color
+                              }
+                              stroke="none"
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right: domestic */}
+                  <div className="space-y-3">
+                    {rightConfs.map((conf) => (
+                      <ConferenceCard key={conf.name} conf={conf} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
