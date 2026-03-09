@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useBookmarks } from "@/hooks/use-bookmarks";
 import { useReadPapers } from "@/hooks/use-read-papers";
 import { AiSummary } from "@/components/paper/ai-summary";
+import { StructuredAbstract } from "@/components/paper/structured-abstract";
 
 interface PaperDetail {
   id: string;
@@ -184,9 +185,7 @@ export function PaperDetailView({ paper }: { paper: PaperDetail }) {
                 <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Abstract
                 </h2>
-                <p className="whitespace-pre-line text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
-                  {paper.abstract}
-                </p>
+                <StructuredAbstract text={paper.abstract} />
               </section>
             </>
           )}
