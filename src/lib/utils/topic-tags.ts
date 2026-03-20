@@ -24,6 +24,16 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "microscopic colitis",
       "collagenous colitis",
       "lymphocytic colitis",
+      "intestinal inflammation",
+      "ileitis",
+      "pouchitis",
+      "fistulizing",
+      "anti tnf",
+      "vedolizumab",
+      "ustekinumab",
+      "risankizumab",
+      "infliximab",
+      "adalimumab",
     ],
   },
   gerd_motility: {
@@ -38,6 +48,16 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "gastroparesis",
       "esophageal stricture",
       "dysphagia",
+      "eosinophilic esophagitis",
+      "esophagitis",
+      "gastritis",
+      "atrophic gastritis",
+      "chronic gastritis",
+      "helicobacter pylori",
+      "h pylori",
+      "fundoplication",
+      "proton pump inhibitor",
+      "ppi",
     ],
   },
   gi_oncology: {
@@ -48,6 +68,7 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "rectal cancer",
       "gastric cancer",
       "stomach cancer",
+      "stomach neoplasm",
       "esophageal cancer",
       "gastrointestinal stromal tumor",
       "gist",
@@ -56,6 +77,19 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "cholangiocarcinoma",
       "gi neoplasm",
       "gastrointestinal neoplasm",
+      "liver neoplasm",
+      "pancreatic neoplasm",
+      "intestinal neoplasm",
+      "colonic neoplasm",
+      "colonic polyp",
+      "adenocarcinoma",
+      "carcinoma hepatocellular",
+      "neoplasm staging",
+      "chemoembolization",
+      "fibrolamellar",
+      "metaplasia",
+      "precancerous condition",
+      "bowel obstruction",
     ],
   },
   hepatology: {
@@ -73,6 +107,24 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "liver transplant",
       "hepatic steatosis",
       "portal hypertension",
+      "hepatectomy",
+      "liver resection",
+      "liver surgery",
+      "liver injury",
+      "hepatoprotective",
+      "hemochromatosis",
+      "iron overload",
+      "ferroportin",
+      "wilson disease",
+      "ascites",
+      "hepatic encephalopathy",
+      "aclf",
+      "acute on chronic liver",
+      "liver regeneration",
+      "hepatocyte",
+      "bilirubin",
+      "jaundice",
+      "drug induced liver",
     ],
   },
   pancreatobiliary: {
@@ -90,6 +142,12 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "ercp",
       "endoscopic retrograde cholangiopancreatography",
       "biliary",
+      "bile duct",
+      "sphincterotomy",
+      "pancreatic duct",
+      "autoimmune pancreatitis",
+      "pancreatic cyst",
+      "ipmn",
     ],
   },
   endoscopy: {
@@ -108,6 +166,11 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "endoscopic submucosal dissection",
       "esd",
       "capsule endoscopy",
+      "polypectomy",
+      "enteroscopy",
+      "cholangioscopy",
+      "narrow band imaging",
+      "chromoendoscopy",
     ],
   },
   functional_gi: {
@@ -119,10 +182,20 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "functional gastrointestinal",
       "gut microbiome",
       "gut brain axis",
+      "brain gut axis",
       "chronic constipation",
       "fecal microbiota transplant",
+      "fecal microbiota transplantation",
       "fmt",
       "motility disorder",
+      "gastrointestinal microbiome",
+      "gut microbiota",
+      "dysbiosis",
+      "probiotics",
+      "enteric nervous system",
+      "visceral hypersensitivity",
+      "small intestinal bacterial overgrowth",
+      "sibo",
     ],
   },
   celiac_nutrition: {
@@ -137,6 +210,10 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "malabsorption",
       "short bowel syndrome",
       "nutritional deficiency",
+      "intestinal villous atrophy",
+      "dermatitis herpetiformis",
+      "tissue transglutaminase",
+      "refractory celiac",
     ],
   },
   gi_bleeding: {
@@ -153,6 +230,11 @@ const TOPIC_CONFIG: Record<Exclude<TopicTag, "others">, TopicConfig> = {
       "melena",
       "hematochezia",
       "hematemesis",
+      "angiodysplasia",
+      "dieulafoy",
+      "esophageal varices",
+      "gastric varices",
+      "peptic ulcer",
     ],
   },
 };
@@ -261,7 +343,26 @@ function scoreSource(text: string, terms: string[], weight: number): number {
 function containsTerm(text: string, term: string): boolean {
   const normalizedTerm = normalizeText(term);
   if (!normalizedTerm) return false;
-  return (` ${text} `).includes(` ${normalizedTerm} `);
+
+  // Exact phrase match (word-boundary)
+  if ((` ${text} `).includes(` ${normalizedTerm} `)) return true;
+
+  // For multi-word terms, also check if all words appear as a contiguous
+  // bag (handles MeSH inverted order like "Carcinoma, Hepatocellular"
+  // matching "hepatocellular carcinoma")
+  const termWords = normalizedTerm.split(" ");
+  if (termWords.length >= 2 && termWords.length <= 4) {
+    const textWords = text.split(" ");
+    // Sliding window: check if all term words appear in any window of
+    // the same length within the text
+    const windowSize = termWords.length;
+    for (let i = 0; i <= textWords.length - windowSize; i++) {
+      const window = textWords.slice(i, i + windowSize);
+      if (termWords.every((tw) => window.includes(tw))) return true;
+    }
+  }
+
+  return false;
 }
 
 function normalizeText(text: string): string {
