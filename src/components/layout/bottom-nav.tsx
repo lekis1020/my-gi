@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FolderTree, BarChart3, CalendarDays, Bookmark, User } from "lucide-react";
+import { Home, FolderTree, TrendingUp, Microscope, BarChart3, Bookmark } from "lucide-react";
 
 const tabs = [
   { href: "/", label: "Home", icon: Home },
   { href: "/topics", label: "Topics", icon: FolderTree },
+  { href: "/trending", label: "Trending", icon: TrendingUp },
+  { href: "/clinical-trials", label: "Trials", icon: Microscope },
   { href: "/insights", label: "Insights", icon: BarChart3 },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/saved", label: "Saved", icon: Bookmark },
-  { href: "/account", label: "Account", icon: User },
 ] as const;
 
 export function BottomNav() {
